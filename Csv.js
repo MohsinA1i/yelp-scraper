@@ -48,7 +48,7 @@ exports.SavePlaces = function (places) {
     fs.writeFile('Businesses.csv', csv, function (err) {if (err) throw err})
 }
 
-exports.SaveReviews = function (reviews) {
+exports.SaveReviews = function (reviews, name) {
     let dataFrame = []
 
     for (post of reviews) {
@@ -64,5 +64,5 @@ exports.SaveReviews = function (reviews) {
 
     const parser = new Parser()
     const csv = parser.parse(dataFrame)
-    fs.writeFile('Reviews.csv', csv, function (err) {if (err) throw err})
+    fs.writeFile(`${name} Reviews.csv`, csv, function (err) {if (err) throw err})
 }

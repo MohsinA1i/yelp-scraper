@@ -23,9 +23,8 @@ async function main(){
 
     let browser = await Scraper.LaunchBrowser()
     let page = await Scraper.OpenPage('olive-mediterranean-grill-evanston', browser)
-    let place = {}
-    place.reviews = await Scraper.GetReviews(page)
-    Csv.SavePlaces([place])
+    let reviews = await Scraper.GetReviews(page)
+    Csv.SaveReviews(reviews, 'Olive Mediterranean Grill Evanston')
     await page.close()
     await browser.close()
 }

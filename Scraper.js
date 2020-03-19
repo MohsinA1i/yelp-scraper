@@ -132,6 +132,7 @@ exports.GetReviews = async function (page) {
         })
         reviews = reviews.concat(scrapedReviews)
 
+        let firstName = await page.$eval('.user-passport-info a', element => element.textContent)
         nextPossible = await page.evaluate(() => {
             let element = document.evaluate('//span[contains(text(),"Next")]//ancestor::a', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
             if (element) {
@@ -140,6 +141,12 @@ exports.GetReviews = async function (page) {
             }
             return false
         })
+        if (nextPossible) {
+            await page.waitForFunction(
+                (firstName) => document.querySelector('.user-passport-info a').textContent != firstName,
+                {timeout: 0}, firstName
+            )
+        }
     }
     return reviews
 }
