@@ -1,34 +1,33 @@
-  const puppeteer = require('puppeteer');
+const Api = require('./API.js')
+const Scraper = require('./Scraper.js')
+const Csv = require('./Csv.js')
 
-(async () => {
+CATEGORIES = ['greek']
+LATITUDE = 42.0493507
+LONGITUDE = -87.6819763
+RADIUS = 40000
 
-    let foodUrl = 'https://www.yelp.com/biz/olive-mediterranean-grill-chicago-3?osq=Olive+Mediterranean+Grill';
+async function main(){
+    /*const places = await Api.GetPlaces(CATEGORIES, LATITUDE, LONGITUDE, RADIUS)
+    let browser = await Scraper.LaunchBrowser()
+    for (const place of places) {
+        let page = await Scraper.OpenPage(place.alias, browser)
+        place.url = await Scraper.GetURL(page)
+        place.ammenities = await Scraper.GetAmmenities(page)
+        place.reviews = await Scraper.GetReviews(page)
+        await page.close()
+    }
+    await browser.close()
+    
+    Csv.SavePlaces(places)*/
 
-    let browser = await puppeteer.launch();
-    let page = await browser.newPage();
+    let browser = await Scraper.LaunchBrowser()
+    let page = await Scraper.OpenPage('olive-mediterranean-grill-evanston', browser)
+    let place = {}
+    place.reviews = await Scraper.GetReviews(page)
+    Csv.SavePlaces([place])
+    await page.close()
+    await browser.close()
+}
 
-    await page.goto(foodUrl, { waitUntil: 'networkidle2'});
-
-    //await page.click('[aria-label=" Next page "]')
-    //debugger;
-    //await page.click('a[target=_blank]');
-    let data = await page.evaluate(() => {
-
-        let title = document.querySelector('div[class="lemon--div__373c0__1mboc u-space-b1 border-color--default__373c0__2oFDT"] > h1').innerText;
-        let amenities = document.querySelector('div[class="lemon--div__373c0__1mboc arrange__373c0__UHqhV gutter-12__373c0__3kguh layout-wrap__373c0__34d4b layout-2-units__373c0__3CiAk border-color--default__373c0__2oFDT"]').innerText;
-        
-        let reviews = document.querySelector('div[class="lemon--div__373c0__1mboc arrange-unit__373c0__1piwO border-color--default__373c0__2oFDT nowrap__373c0__1_N1j"]').innerText;
-        
-        return {
-            title,
-            amenities,
-            reviews
-        }
-    });
-
-console.log(data);
-
-debugger;
-
-await browser.close();
-})();
+main()

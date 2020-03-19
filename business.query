@@ -1,0 +1,31 @@
+{    
+    business(id: "ALIAS") {
+        name
+        rating
+        review_count
+        price
+        phone
+        location {
+            formatted_address
+        }
+        coordinates {
+            latitude
+            longitude
+        }
+        alias
+        is_closed
+        is_claimed
+        categories {
+            title
+            alias
+        }
+        hours {
+            open {
+                day
+                start
+                end
+                is_overnight
+            }
+        }
+    }
+}
