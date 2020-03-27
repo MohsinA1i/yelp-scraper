@@ -3,7 +3,7 @@
             latitude: LATITUDE,
 			longitude: LONGITUDE,
 			radius: RADIUS,
-            limit: 1,
+            limit: 50,
 			offset: OFFSET) {
         total
         business {

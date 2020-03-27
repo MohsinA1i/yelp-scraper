@@ -1,4 +1,5 @@
 const { Parser } = require('json2csv')
+const csv = require('csvtojson')
 const fs = require('fs')
 
 exports.SavePlaces = function (places) {
@@ -30,15 +31,15 @@ exports.SavePlaces = function (places) {
                 place[`${days[openHours.day]}_open`] = openHours.start
                 place[`${days[openHours.day]}_close`] = openHours.end
             }
-            delete place.hours
         }
+        delete place.hours
 
         if (place.ammenities) {
             Object.assign(place, place.ammenities)
             delete place.ammenities
         }
 
-        if (place.reviews) exports.SaveReviews(place.reviews)
+        if (place.reviews) exports.SaveReviews(place.reviews, place.alias)
         
         dataFrame.push(place)
     }
@@ -65,4 +66,8 @@ exports.SaveReviews = function (reviews, name) {
     const parser = new Parser()
     const csv = parser.parse(dataFrame)
     fs.writeFile(`${name} Reviews.csv`, csv, function (err) {if (err) throw err})
+}
+
+exports.LoadCsv = async function (fileName) {
+    return await csv().fromFile(fileName);
 }

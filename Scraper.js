@@ -18,16 +18,16 @@ exports.GetURL = async function(page) {
 }
 
 exports.GetAmmenities = async function(page) {
-    const [expander] = await page.$x('//a[contains(text(), "Attributes")]')
+    const [expander] = await page.$x('//a/p[contains(text(), "More Attributes")]')
     if (expander) {
         await expander.click()
         await page.waitForFunction(() =>
-            document.evaluate('//a[contains(text(), "Attributes")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue == undefined,
+            document.evaluate('//a/p[contains(text(), "More Attributes")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue == undefined,
         {timeout: 0})
     }
     
     return await page.evaluate(() => {
-        let element = document.evaluate('//section[contains(text(), "Amenities")]', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+        let element = document.evaluate('//h3[text()="Amenities"]//ancestor::section', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
         if (element == undefined) return
         let children = element.childNodes[1].firstChild.firstChild.firstChild.children 
         let amenities = {}
@@ -44,10 +44,17 @@ exports.GetReviews = async function (page) {
     let reviews = []
     let nextPossible = true
     while (nextPossible) {
+        await sleep((Math.random() * 1000) + 1000)
+
         let scrapedReviews = await page.evaluate(() => {
-            let element = document.evaluate('//*[self::h3 or self::h4][contains(text(),"Recommended Reviews")]//ancestor::section[1]//div/ul', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+            let element = document.evaluate('//*[self::h3 or self::h4][text()="Recommended Reviews"]//ancestor::section[1]//div/ul', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
             let posts = []
+
+            let postIndex = 0
             for (let child of element.childNodes) {
+                console.log(`       Scraping post ${postIndex}`)
+                postIndex++
+
                 let reviewElement = child.firstElementChild.childNodes[1]
 
                 let place_photos = reviewElement.querySelector('[class*="camera"]')
@@ -66,7 +73,7 @@ exports.GetReviews = async function (page) {
                 let expanders = reviewElement.querySelectorAll('[role="button"]')
                 for (expander of expanders) expander.click()
                 let ratingElements = reviewElement.querySelectorAll('[aria-label$="star rating"]')
-                let textElements = reviewElement.querySelectorAll('div > p')
+                let textElements = reviewElement.querySelectorAll('div [lang="en"]')
                 let reactionElements = {}
                 reactionElements.useful = reviewElement.querySelectorAll('[class*="useful"]')
                 reactionElements.funny = reviewElement.querySelectorAll('[class*="funny"]')
@@ -81,7 +88,7 @@ exports.GetReviews = async function (page) {
                         else reaction = "0"
                         reactions[reactionType] = reaction
                     }
-                    let photos = textElements[i].parentElement.nextElementSibling.querySelectorAll('[class*="photo-box-img"]').length
+                    let photos = textElements[i].parentElement.parentElement.nextElementSibling.querySelectorAll('[class*="photo-box-img"]').length
                     reviews.push({
                         rating : ratingElements[i].getAttribute('aria-label').charAt(0),
                         date : ratingElements[i].parentElement.parentElement.nextElementSibling.firstElementChild.textContent,
@@ -97,9 +104,14 @@ exports.GetReviews = async function (page) {
 
                 let elite_2020 = userElement.querySelector('[href="/elite"]') != undefined
 
-                let name = userElement.querySelector('.user-passport-info a').textContent
+                let name = userElement.querySelector('.user-passport-info a')
+                if (name) name = name.textContent
 
-                let location = userElement.querySelector('.user-passport-info > div').textContent
+                let id = userElement.querySelector('[href^="/user_details?userid="]')
+                if (id) id = id.getAttribute('href').split('=')[1]
+
+                let location = userElement.querySelector('.user-passport-info > div')
+                if (location) location = location.textContent
 
                 let userFriends = userElement.querySelector('[class*="friend"]')
                 if (userFriends) userFriends = userFriends.parentElement.textContent.split(' ')[0]
@@ -113,6 +125,7 @@ exports.GetReviews = async function (page) {
                 else userPhotos = "0"
 
                 let user = {
+                    id : id,
                     name : name,
                     elite_2020 : elite_2020,
                     location : location,
@@ -132,9 +145,9 @@ exports.GetReviews = async function (page) {
         })
         reviews = reviews.concat(scrapedReviews)
 
-        let firstName = await page.$eval('.user-passport-info a', element => element.textContent)
+        let pagination = await page.$eval('[aria-label="Pagination navigation"] > div', element => element.textContent)
         nextPossible = await page.evaluate(() => {
-            let element = document.evaluate('//span[contains(text(),"Next")]//ancestor::a', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+            let element = document.evaluate('//span[text()="Next"]//ancestor::a', document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
             if (element) {
                 element.click()
                 return true
@@ -143,10 +156,14 @@ exports.GetReviews = async function (page) {
         })
         if (nextPossible) {
             await page.waitForFunction(
-                (firstName) => document.querySelector('.user-passport-info a').textContent != firstName,
-                {timeout: 0}, firstName
+                (pagination) => document.querySelector('[aria-label="Pagination navigation"] > div').textContent != pagination,
+                {timeout: 0}, pagination
             )
         }
     }
     return reviews
+}
+
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
 }
