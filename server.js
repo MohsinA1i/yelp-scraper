@@ -8,7 +8,7 @@ LONGITUDE = -87.653410
 RADIUS = 16000
 
 async function main(){
-    /*const places = await Api.GetPlaces(CATEGORIES, LATITUDE, LONGITUDE, RADIUS)
+    const places = await Api.GetPlaces(CATEGORIES, LATITUDE, LONGITUDE, RADIUS)
     let browser = await Scraper.LaunchBrowser()
     console.log(`${places.length} places found`)
     for (const place of places) {
@@ -23,7 +23,7 @@ async function main(){
         await page.close()
     }
     await browser.close()
-    Csv.SavePlaces(places)*/
+    Csv.SavePlaces(places)
 
     /*let browser = await Scraper.LaunchBrowser()
     let places = await Csv.LoadCsv('Businesses.csv')
@@ -37,12 +37,12 @@ async function main(){
     }
     await browser.close()*/
 
-    let browser = await Scraper.LaunchBrowser()
+    /*let browser = await Scraper.LaunchBrowser()
     let page = await Scraper.OpenPage('olive-mediterranean-grill-chicago-7', browser)
     let reviews = await Scraper.GetReviews(page)
     await page.close()
     await browser.close()
-    Csv.SaveReviews(reviews, 'Olive Mediterranean Grill Van Buren')
+    Csv.SaveReviews(reviews, 'Olive Mediterranean Grill Van Buren')*/
 }
 
 main()
