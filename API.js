@@ -32,7 +32,7 @@ async function QueryAPI(query) {
         hostname: 'api.yelp.com',
         path: '/v3/graphql',
         headers: {
-            'Authorization': 'Bearer 7VD_AGUnarRmaKfV9NutfGzSZ3k9k8ysy08eSALlnrLsKyb524M3o8-9qdhdzqNai_MbclTgmS0HrhbJ6phuej-kBEHPIP9fIcfwY5B7foMN6aHDrnt0ysKXXyYYXnYx',
+            'Authorization': 'Bearer YOUR_API_KEY',
             'Content-Type': 'application/graphql'
         },
         data: query
